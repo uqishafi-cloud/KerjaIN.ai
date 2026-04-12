@@ -1,0 +1,13 @@
+# Environments
+env/
+venv/
+
+# Dataset & Caches
+__pycache__/
+.pytest_cache/
+*.pyc
+
+*.egg-info/
+
+# Environment Variables (Untuk API Keys nanti)
+.env
