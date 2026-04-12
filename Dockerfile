@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
 COPY pyproject.toml ./
 RUN pip install --upgrade pip
 RUN pip install .
-RUN pip install python-docx pytesseract Pillow PyPDF2 uvicorn fastapi pydantic requests
+RUN pip install python-docx pytesseract Pillow PyPDF2 uvicorn fastapi pydantic requests python-multipart
 
 COPY . .
 
