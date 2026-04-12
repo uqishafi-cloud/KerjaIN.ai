@@ -33,7 +33,7 @@ workflow.add_edge(START, "supervisor")
 workflow.add_conditional_edges(
     "supervisor", 
     lambda x: x["next_route"],
-    {"sql_agent": "sql_agent", "rag_agent": "rag_agent", "consultant_agent": "consultant_agent"}
+    {"sql_agent": "sql_agent", "rag_agent": "rag_agent", "consultant_agent": "consultant_agent", "consultant_agent": "sql_agent", "consultant_agent": "rag_agent"}
 )
 workflow.add_edge("sql_agent", END)
 workflow.add_edge("rag_agent", END)
