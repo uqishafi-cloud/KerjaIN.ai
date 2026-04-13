@@ -16,12 +16,13 @@ def supervisor_node(state: GraphState):
     Tentukan tujuan pertanyaan ini: 'sql' atau 'rag'.
     - 'sql': Jika terkait data terstruktur (gaji spesifik, lokasi, tipe kerja WFO/WFH, jumlah data, statistik).
     - 'rag': Jika terkait data deskriptif (tugas, kualifikasi, skill, konsultasi umum).
+    - 'consultant_agent': Jika terkait evaluasi CV atau rekomendasi karir.
     Pertanyaan: {user_msg}
     Jawab dengan satu kata saja (sql atau rag).
     """
     intent = llm.invoke(intent_prompt).content.strip().lower()
     
-    return {"next_route": "sql_agent" if "sql" in intent else "rag_agent"}
+    return {"next_route": "sql_agent" if "sql" in intent else "rag_agent" if "rag" in intent else "consultant_agent"}
 
 workflow = StateGraph(GraphState)
 workflow.add_node("supervisor", supervisor_node)
