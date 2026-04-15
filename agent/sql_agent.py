@@ -10,6 +10,8 @@ def sql_agent_node(state: GraphState):
     user_role = state.get("user_role", "jobseeker")
     db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "indonesian_jobs.db")
     
+    recent_messages = state["messages"][-6:]
+    history_text = "\n".join([f"{'User' if m.type == 'human' else 'Agent'}: {m.content}" for m in recent_messages])
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
     
     system_prompt = f"""
@@ -19,10 +21,12 @@ def sql_agent_node(state: GraphState):
     Aturan Ketat:
     1. Hanya berikan query SELECT. Dilarang keras melakukan operasi manipulasi data lainnya.
     2. Role pengguna saat ini adalah: '{user_role}'.
-    3. Jika role 'jobseeker', HANYA berikan daftar lowongan yang relevan. Jangan berikan data statistik, agregat, atau rata-rata gaji kompetitor.
-    4. Jika role 'hr', kamu diizinkan memberikan analisis statistik, agregat, atau rata-rata gaji.
+    3. Keluarkan HANYA query SQL murni tanpa format markdown (tanpa ```sql).
     
-    Keluarkan HANYA query SQL murni tanpa format markdown.
+    Berikut adalah histori percakapan terakhir untuk memahami konteks pertanyaan User:
+    {history_text}
+    
+    Buatlah Query SQL berdasarkan histori di atas.
     """
     
     query = llm.invoke([("system", system_prompt), ("human", user_msg)]).content.strip()
@@ -37,5 +41,14 @@ def sql_agent_node(state: GraphState):
     except Exception as e:
         result_text = f"Terjadi kesalahan query: {str(e)}"
 
-    final_answer = llm.invoke(f"Rangkum hasil database ini dengan bahasa natural untuk user ({user_role}): {result_text}").content
+    final_prompt = f"""
+    Histori Obrolan:
+    {history_text}
+    
+    Hasil pencarian database terbaru: {result_text}
+    
+    Tugasmu: Rangkum hasil database ini dengan bahasa natural untuk membalas pesan terakhir User ({user_role}).
+    """
+    final_answer = llm.invoke(final_prompt).content
+    
     return {"messages": [AIMessage(content=final_answer)]}
